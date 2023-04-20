@@ -8,33 +8,79 @@ const port = process.env.PORT || 3000
 
 app.use(express.json())
 
-app.post('/tables', (req, res) => {
+app.post('/tables', async (req, res) => {
     const table = new Table(req.body)
 
-    table.save().then(() => {
+    try {
+        await table.save()
         res.status(201).send(table)
-    }).catch((error) => {
+    } catch (error) {
         res.status(400).send(error)
-    })
+    }
 })
 
-app.get('/tables', (req, res) => {
-    Table.find({}).then((tables) => {
+app.get('/tables', async (req, res) => {
+    try {
+        const tables = await Table.find({})
         res.send(tables)
-    }).catch((e) => {
-        res.status(500).send(e)
-    })
+    } catch (error) {
+        res.status(500).send(error)
+    }
 })
 
-app.post('/reservation', (req, res) => {
+app.get('/tables/:id', async (req, res) => {
+    const _id = req.params.id
+
+    try {
+        const table = await Table.findById(_id)
+
+        if (!table) {
+            return res.status(404).send()
+        }
+
+        res.send(table)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+})
+
+app.post('/reservations', async (req, res) => {
     const reservation = new Reservation(req.body)
 
-    reservation.save().then(() => {
+    try {
+        await reservation.save()
         res.status(201).send(reservation)
-    }).catch((error) => {
+    } catch (error) {
         res.status(400).send(error)
-    })
+    }
 })  
+
+app.get('/reservations', async (req, res) => {
+    try {
+        const reservations = await Reservation.find({})
+        res.send(reservations)
+    } catch (error) {
+        res.send(500).send(error)
+    }
+})
+
+app.get('/reservations/:id', async (req, res) => {
+    const _id = req.params.id
+
+    try {
+        const reservation = await Reservation.findById(_id)
+
+        if (!reservation) {
+            return res.status(404).send()
+        }
+
+        res.send(reservation)
+    } catch (error) {
+        res.status(500).send()
+    }
+})
+
+
 
 app.listen(port, () => {
     console.log('Server is up on port' + port)
